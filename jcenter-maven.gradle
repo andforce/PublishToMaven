@@ -1,4 +1,6 @@
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
 apply from: 'jcenter-javadoc.gradle'
 
 class JcenterConfig {
