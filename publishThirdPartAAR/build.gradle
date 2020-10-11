@@ -1,0 +1,19 @@
+apply plugin: 'java-library'
+
+apply from: '../maven-third-part.gradle'
+
+publishConfig {
+    groupId 'com.andforce.test'
+    artifactId "andforce"
+    version "1.0.0"
+    description 'update version 1.0.0'
+    thirdLibPath file('publishaar-release.aar').getAbsolutePath()
+    localDebug true
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+sourceCompatibility = "7"
+targetCompatibility = "7"
