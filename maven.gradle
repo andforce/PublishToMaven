@@ -6,7 +6,16 @@ class PublishConfig {
     String version
     String groupId
     String description
+    String thirdLibPath
     boolean localDebug = false
+
+    String getThirdLibPath() {
+        return thirdLibPath
+    }
+
+    void setThirdLibPath(String thirdLibPath) {
+        this.thirdLibPath = thirdLibPath
+    }
 
     String getArtifactId() {
         return artifactId
@@ -133,32 +142,79 @@ project.afterEvaluate {
 
     PublishConfig publishConfig = (PublishConfig) project.extensions.getByName("publishConfig")
     println("----->> publishConfig: " + (publishConfig == null) + publishConfig.toString())
-    uploadArchives {
-        configuration = configurations.archives
-        repositories {
-            mavenDeployer {
 
-                println("----->> mavenDeployer " + (publishConfig == null) + publishConfig.toString())
+    if (publishConfig.thirdLibPath != null) {
 
-                if (publishConfig.localDebug) {
-                    snapshotRepository(url: "file://$buildDir/repo-snapshot")
-                    repository(url: "file://$buildDir/repo")
-                } else {
-                    snapshotRepository(url: "http://your.maven.url/") {
-                        authentication(userName: 'your.name', password: 'your.pwd')
-                    }
-                    repository(url: "http://http://your.maven.url//") {
-                        authentication(userName: 'your.name', password: 'your.pwd')
+        publishing {
+            repositories {
+                maven {
+                    if (publishConfig.localDebug) {
+                        url "$buildDir/repo"
+                    } else {
+                        url "http://your.url"
+                        credentials {
+                            username 'your.name'
+                            password 'your.pwd'
+                        }
                     }
                 }
-                pom.project {
+            }
+
+            publications {
+                publishaar(MavenPublication) {
                     artifactId publishConfig.artifactId
                     version publishConfig.version
                     groupId publishConfig.groupId
-                    packaging project.hasProperty("android") ? "aar" : "jar"
                     description publishConfig.description
+                    //packaging publishConfig.thirdLibPath.endsWith("aar") ? "aar" : "jar"
+                    artifact(publishConfig.thirdLibPath)
                 }
             }
+        }
+
+        Task task = task publishToMaven
+        task.dependsOn publish
+        task.group = "PublishToMaven"
+        task.description = 'publish compiled code to maven.'
+        task.doLast {
+            println "任务描述：${task.description}"
+        }
+    } else {
+        uploadArchives {
+            configuration = configurations.archives
+            repositories {
+                mavenDeployer {
+
+                    println("----->> mavenDeployer " + (publishConfig == null) + publishConfig.toString())
+
+                    if (publishConfig.localDebug) {
+                        snapshotRepository(url: "file://$buildDir/repo-snapshot")
+                        repository(url: "file://$buildDir/repo")
+                    } else {
+                        snapshotRepository(url: "http://your.maven.url/") {
+                            authentication(userName: 'your.name', password: 'your.pwd')
+                        }
+                        repository(url: "http://http://your.maven.url//") {
+                            authentication(userName: 'your.name', password: 'your.pwd')
+                        }
+                    }
+                    pom.project {
+                        artifactId publishConfig.artifactId
+                        version publishConfig.version
+                        groupId publishConfig.groupId
+                        packaging project.hasProperty("android") ? "aar" : "jar"
+                        description publishConfig.description
+                    }
+                }
+            }
+        }
+
+        Task task = task publishToMaven
+        task.dependsOn uploadArchives
+        task.group = "PublishToMaven"
+        task.description = 'publish assemble code to maven.'
+        task.doLast {
+            println "任务描述：${task.description}"
         }
     }
 }
