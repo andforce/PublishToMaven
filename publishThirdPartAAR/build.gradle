@@ -7,7 +7,7 @@ publishConfig {
     artifactId "andforce"
     version "1.0.0"
     description 'update version 1.0.0'
-    thirdLibPath file('publishaar-release.aar').getAbsolutePath()
+    thirdLibPath file('andforce-1.0.0.aar').getAbsolutePath()
     localDebug true
 }
 
