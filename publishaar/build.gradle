@@ -7,6 +7,10 @@ publishConfig {
     artifactId "andforce"
     version "1.0.0"
     description 'update version 1.0.0'
+    releaseMaven "http://your.releasemaven.url"
+    snapshotMaven "http://your.snapshotmaven.url"
+    username "your username"
+    password "your password"
     localDebug true
 }
 

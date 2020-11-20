@@ -1,5 +1,4 @@
 apply plugin: 'maven'
-apply plugin: "maven-publish"
 
 class PublishConfig {
     String artifactId
@@ -7,7 +6,44 @@ class PublishConfig {
     String groupId
     String description
     String thirdLibPath
+    String releaseMaven
+    String snapshotMaven
+    String username
+    String password
+
     boolean localDebug = false
+
+    String getUsername() {
+        return username
+    }
+
+    void setUsername(String username) {
+        this.username = username
+    }
+
+    String getPassword() {
+        return password
+    }
+
+    void setPassword(String password) {
+        this.password = password
+    }
+
+    String getReleaseMaven() {
+        return releaseMaven
+    }
+
+    void setReleaseMaven(String releaseMaven) {
+        this.releaseMaven = releaseMaven
+    }
+
+    String getSnapshotMaven() {
+        return snapshotMaven
+    }
+
+    void setSnapshotMaven(String snapshotMaven) {
+        this.snapshotMaven = snapshotMaven
+    }
 
     String getThirdLibPath() {
         return thirdLibPath
@@ -62,6 +98,8 @@ class PublishConfig {
         return this.groupId + ":" + this.artifactId + ":" + this.version
     }
 }
+
+apply plugin: "maven-publish"
 
 project.extensions.create('publishConfig', PublishConfig)
 
@@ -151,10 +189,10 @@ project.afterEvaluate {
                     if (publishConfig.localDebug) {
                         url "$buildDir/repo"
                     } else {
-                        url "http://your.url"
+                        url publishConfig.releaseMaven
                         credentials {
-                            username 'your.name'
-                            password 'your.pwd'
+                            username publishConfig.username
+                            password publishConfig.password
                         }
                     }
                 }
@@ -177,7 +215,7 @@ project.afterEvaluate {
         task.group = "PublishToMaven"
         task.description = 'publish compiled code to maven.'
         task.doLast {
-            println "任务描述：${task.description}"
+            println "task description: ${task.description}"
         }
     } else {
         uploadArchives {
@@ -191,11 +229,11 @@ project.afterEvaluate {
                         snapshotRepository(url: "file://$buildDir/repo-snapshot")
                         repository(url: "file://$buildDir/repo")
                     } else {
-                        snapshotRepository(url: "http://your.maven.url/") {
-                            authentication(userName: 'your.name', password: 'your.pwd')
+                        snapshotRepository(url: publishConfig.snapshotMaven) {
+                            authentication(userName: publishConfig.username, password: publishConfig.password)
                         }
-                        repository(url: "http://http://your.maven.url//") {
-                            authentication(userName: 'your.name', password: 'your.pwd')
+                        repository(url: publishConfig.releaseMaven) {
+                            authentication(userName: publishConfig.username, password: publishConfig.password)
                         }
                     }
                     pom.project {
@@ -214,7 +252,7 @@ project.afterEvaluate {
         task.group = "PublishToMaven"
         task.description = 'publish assemble code to maven.'
         task.doLast {
-            println "任务描述：${task.description}"
+            println "task description: ${task.description}"
         }
     }
 }
